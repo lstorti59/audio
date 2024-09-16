@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dialogflow Messenger con Audio</title>
+    <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
+    <style>
+        df-messenger {
+            --df-messenger-bot-message: #4285f4;
+            --df-messenger-button-titlebar-color: #4285f4;
+            --df-messenger-send-icon: #4285f4;
+        }
+
+        .voice-controls {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        #user-input {
+            padding: 10px;
+            width: 250px;
+        }
+
+        #voice-btn, #send-btn {
+            padding: 10px;
+            background-color: #26c6da;
+            border-radius: 5px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Dialogflow Messenger -->
+<df-messenger
+    intent="WELCOME"
+    chat-title="Vittorino_Bot"
+    agent-id="8796712f-5742-49e6-a47f-97c955f84d15"
+    language-code="it">
+</df-messenger>
+
+<!-- Campo di input personalizzato con microfono -->
+<div class="voice-controls">
+    <input type="text" id="user-input" placeholder="Scrivi o usa il microfono" />
+    <button id="voice-btn">🎤</button>
+    <button id="send-btn">Invia</button>
+</div>
+
+<!-- Riconoscimento vocale -->
+<script>
+    const inputField = document.getElementById('user-input');
+    const sendBtn = document.getElementById('send-btn');
+    const voiceBtn = document.getElementById('voice-btn');
+
+    // Configura il riconoscimento vocale
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = 'it-IT'; // Lingua italiana per il riconoscimento vocale
+
+    voiceBtn.addEventListener('click', () => {
+        recognition.start();
+    });
+
+    recognition.onresult = function(event) {
+        const spokenText = event.results[0][0].transcript;
+        inputField.value = spokenText; // Inserisci il testo trascritto nel campo di input
+    };
+
+    recognition.onerror = function(event) {
+        alert('Errore nel riconoscimento vocale: ' + event.error);
+    };
+
+    // Invio del messaggio al bot
+    sendBtn.addEventListener('click', () => {
+        const dfMessenger = document.querySelector('df-messenger');
+        const userMessage = inputField.value.trim();
+
+        if (userMessage) {
+            dfMessenger.renderCustomText(userMessage); // Invia il testo al bot
+            inputField.value = ''; // Svuota il campo di input
+        }
+    });
+
+    // Permetti l'invio con il tasto Enter
+    inputField.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            sendBtn.click();
+        }
+    });
+</script>
+
+</body>
+</html>
